@@ -21,7 +21,7 @@ jobs:
       run: |
         dnf install -y epel-release dnf-plugins-core
         dnf groupinstall -y "Development Tools"
-        dnf install -y rpm-build redhat-rpm-config ncurses-devel elfutils-libelf-devel openssl-devel bison flex bc git curls tar xz wget
+        dnf install -y rpm-build redhat-rpm-config ncurses-devel elfutils-libelf-devel openssl-devel bison flex bc git curl tar xz wget
 
     - name: Set up RPM Build Tree
       run: |
