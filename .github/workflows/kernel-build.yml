@@ -1,0 +1,47 @@
+name: Build Custom Kernel for Rocky Linux 10
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container:
+      image: rockylinux:10
+    steps:
+
+    - name: Install build dependencies
+      run: |
+        dnf install -y epel-release dnf-plugins-core
+        dnf groupinstall -y "Development Tools"
+        dnf install -y rpm-build redhat-rpm-config ncurses-devel elfutils-libelf-devel openssl-devel bison flex bc git curls tar xz wget
+
+    - name: Set up RPM Build Tree
+      run: |
+        mkdir -p ~/rpmbuild/{BUILD,BUILDROOT,RPMS,SOURCES,SPECS,SRPMS}
+        echo '%_topdir %(echo $HOME)/rpmbuild' > ~/.rpmmacros
+
+    - name: Download Rocky Linux Kernel SRPM
+      run: |
+        dnf download --source kernel
+        rpm -ivh kernel-*.src.rpm
+
+    - name: Apply custom config changes
+      run: |
+        sed -i '/^CONFIG_BTRFS_FS=/c\CONFIG_BTRFS_FS=y' ~/rpmbuild/SOURCES/kernel-x86_64-rhel.config
+        echo "# CONFIG_BTRFS_DEBUG is not set" >> ~/rpmbuild/SOURCES/kernel-x86_64-rhel.config
+        sed -i 's/^%define with_kabi_check 1/%define with_kabi_check 0/' ~/rpmbuild/SPECS/kernel.spec
+
+    - name: Build Kernel
+      run: |
+        cd ~/rpmbuild/SPECS
+        rpmbuild -ba kernel.spec
+
+    - name: Upload RPMS
+      uses: actions/upload-artifact@v4
+      with:
+        name: Custom_Kernel_RPMS
+        path: ~/rpmbuild/RPMS/x86_64/*.rpm
+    
