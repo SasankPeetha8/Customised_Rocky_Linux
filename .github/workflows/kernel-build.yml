@@ -39,10 +39,16 @@ jobs:
         echo "# CONFIG_BTRFS_DEBUG is not set" >> ~/rpmbuild/SOURCES/kernel-x86_64-rhel.config
         sed -i 's/^%define with_kabi_check 1/%define with_kabi_check 0/' ~/rpmbuild/SPECS/kernel.spec
 
+    - name: Install Kernel Dependencies
+      run: |
+        cd ~/rpmbuild/SPECS
+        dnf install dnf-plugins-core
+        dnf builddep kernel.spec
+
     - name: Build Kernel
       run: |
         cd ~/rpmbuild/SPECS
-        rpmbuild -ba kernel.spec
+        rpmbuild -ba kernel.spec --without=kabi
 
     - name: Upload RPMS
       uses: actions/upload-artifact@v4
