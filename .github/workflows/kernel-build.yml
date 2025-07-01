@@ -49,7 +49,7 @@ jobs:
     - name: Install Kernel Dependencies
       run: |
         cd ~/rpmbuild/SPECS
-        dnf builddep kernel.spec
+        dnf builddep -y kernel.spec
 
     - name: Build Kernel
       run: |
