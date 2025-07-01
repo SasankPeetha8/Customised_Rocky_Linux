@@ -12,6 +12,11 @@ jobs:
       image: quay.io/rockylinux/rockylinux:10
     steps:
 
+    - name: Fix Rocky mirrorlist issue
+      run: |
+        sed -i 's|^mirrorlist=|#mirrorlist=|g' /etc/yum.repos.d/*.repo
+        sed -i 's|^#baseurl=http://dl.rockylinux.org|baseurl=https://dl.rockylinux.org|g' /etc/yum.repos.d/*.repo
+
     - name: Install build dependencies
       run: |
         dnf install -y epel-release dnf-plugins-core
